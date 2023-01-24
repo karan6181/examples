@@ -10,7 +10,7 @@ import torch
 from composer.core import DataSpec
 from composer.datasets.utils import NormalizationFn, pil_image_collate
 from composer.utils import dist
-from streaming import Dataset
+from streaming import StreamingDataset
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import ImageFolder, VisionDataset
@@ -21,7 +21,7 @@ IMAGENET_CHANNEL_MEAN = (0.485 * 255, 0.456 * 255, 0.406 * 255)
 IMAGENET_CHANNEL_STD = (0.229 * 255, 0.224 * 255, 0.225 * 255)
 
 
-class StreamingImageNet(Dataset, VisionDataset):
+class StreamingImageNet(StreamingDataset, VisionDataset):
     """ImageNet streaming dataset based on PyTorch's VisionDataset.
 
     Args:
@@ -61,11 +61,11 @@ class StreamingImageNet(Dataset, VisionDataset):
                          local=local,
                          split=split,
                          shuffle=shuffle,
-                         prefetch=prefetch,
+                         predownload=prefetch,
                          keep_zip=False,
-                         retry=retry,
-                         timeout=timeout,
-                         hash=None,
+                         download_retry=retry,
+                         download_timeout=timeout,
+                         validate_hash=None,
                          batch_size=batch_size)
 
     def __getitem__(self, idx: int) -> Any:

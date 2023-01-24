@@ -2,12 +2,16 @@ run_name: resnet_example
 cluster:       # Name of the cluster to use for this run
 gpu_type: a100_40gb # Type of GPU to use
 gpu_num: 8  # Number of GPUs to use
-image: mosaicml/pytorch:1.12.1_cu116-python3.9-ubuntu20.04
+image: mosaicml/pytorch:1.13.0_cu117-python3.10-ubuntu20.04
 integrations:
 - integration_type: git_repo
-  git_repo: mosaicml/examples
-  git_branch: main
+  git_repo: karan6181/examples
+  git_branch: rel_test
   ssh_clone: false
+- integration_type: git_repo
+  git_repo: mosaicml/streaming
+  git_branch: main
+  pip_install: '--user .'
 command: |
   cd examples/resnet
   pip install -r requirements.txt
