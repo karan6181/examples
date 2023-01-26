@@ -190,7 +190,7 @@ def main(config):
         model=composer_model,
         train_dataloader=train_dataspec,
         eval_dataloader=eval_dataspec,
-        eval_interval='1ep',
+        eval_interval=config.get('eval_interval', '1ep'),
         optimizers=optimizer,
         schedulers=lr_scheduler,
         algorithms=algorithms,
