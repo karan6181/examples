@@ -204,6 +204,7 @@ def main(config):
         device=device,
         precision=precision,
         grad_accum=config.grad_accum,
+        autoresume=config.get('autoresume', False),
         seed=config.seed)
     print('Built Trainer\n')
 
