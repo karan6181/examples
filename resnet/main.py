@@ -78,7 +78,7 @@ def main(config):
         crop_size=config.train_dataset.crop_size,
         num_workers=8,
         pin_memory=True,
-        persistent_workers=False)
+        persistent_workers=True)
 
     print('Built train dataloader\n')
 
@@ -96,7 +96,7 @@ def main(config):
         crop_size=config.eval_dataset.crop_size,
         num_workers=8,
         pin_memory=True,
-        persistent_workers=False)
+        persistent_workers=True)
     print('Built evaluation dataloader\n')
 
     # Instantiate torchvision ResNet model
