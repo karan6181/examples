@@ -42,7 +42,7 @@ def log_config(cfg: DictConfig):
 
 
 def main(config):
-    #reproducibility.seed_all(config.seed)
+    reproducibility.seed_all(config.seed)
     if config.grad_accum == 'auto' and not torch.cuda.is_available():
         raise ValueError(
             'grad_accum="auto" requires training with a GPU; please specify grad_accum as an integer'
