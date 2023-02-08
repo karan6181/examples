@@ -42,7 +42,7 @@ def main(cfg: DictConfig,
          do_train: bool = True) -> Optional[Trainer]:
     print('Training using config: ')
     print(om.to_yaml(cfg))
-    reproducibility.seed_all(cfg.seed)
+    #reproducibility.seed_all(cfg.seed)
 
     # Build Model
     print('Initializing model...')
