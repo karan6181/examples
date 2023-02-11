@@ -44,6 +44,7 @@ jobs:
         set -ex
         export PATH=/composer-python:$PATH
         python -m pip install --upgrade 'pip<23' wheel
+        python -m pip install git+https://github.com/karan6181/streaming.git@single_node
     - name: Test
       run: |
         export PATH=/composer-python:$PATH
