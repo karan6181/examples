@@ -38,7 +38,7 @@ def main(cfg):
         f'torch.distributed.*_base is a private function and will be deprecated.*'
     )
 
-    reproducibility.seed_all(cfg.seed)
+    #reproducibility.seed_all(cfg.seed)
 
     # Run Name
     if cfg.get('run_name') is None:
