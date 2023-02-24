@@ -60,6 +60,7 @@ class StreamingTextDataset(StreamingDataset):
                  shuffle_seed: int = 9176,
                  num_canonical_nodes: Optional[int] = 128,
                  batch_size: Optional[int] = None,
+                 shared_dir_seed: Optional[int] = 9876,
                  **kwargs: Dict[str, Any]):
 
         group_method = kwargs.pop('group_method', None)
@@ -94,7 +95,8 @@ class StreamingTextDataset(StreamingDataset):
                          validate_hash=validate_hash,
                          shuffle_seed=shuffle_seed,
                          num_canonical_nodes=num_canonical_nodes,
-                         batch_size=batch_size)
+                         batch_size=batch_size,
+                         shared_dir_seed=shared_dir_seed)
         self.max_seq_len = max_seq_len
 
         # Build tokenizer
@@ -153,7 +155,8 @@ def build_text_dataloader(cfg: DictConfig, device_batch_size: int):
         validate_hash=cfg.dataset.get('validate_hash', None),
         shuffle_seed=cfg.dataset.get('shuffle_seed', 9176),
         num_canonical_nodes=cfg.dataset.get('num_canonical_nodes', 128),
-        batch_size=device_batch_size)
+        batch_size=device_batch_size,
+        shared_dir_seed=cfg.dataset.get('shared_dir_seed', 9876))
 
     mlm_probability = cfg.dataset.get('mlm_probability', None)
     collate_fn = transformers.DataCollatorForLanguageModeling(
