@@ -1,2 +1,2 @@
-mosaicml[health_checker]>=0.11.0,<0.13
+mosaicml[health_checker, wandb]>=0.11.0,<0.13
 omegaconf
