@@ -67,7 +67,7 @@ def build_composer_model(cfg):
 
 
 def main(cfg):
-    #reproducibility.seed_all(cfg.seed)
+    reproducibility.seed_all(cfg.seed)
 
     # Run Name
     cfg.run_name = cfg.get('run_name', os.environ.get('COMPOSER_RUN_NAME',
