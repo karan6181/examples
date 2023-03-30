@@ -152,7 +152,7 @@ def build_text_dataloader(cfg: DictConfig, device_batch_size: int):
         split=cfg.dataset.get('split', None),
         shuffle=cfg.dataset.get('shuffle', False),
         predownload=cfg.dataset.get('predownload', 100_000),
-        keep_zip=cfg.dataset.get('keep_zip', None),
+        keep_zip=cfg.dataset.get('keep_zip', False),
         download_retry=cfg.dataset.get('download_retry', 2),
         download_timeout=cfg.dataset.get('download_timeout', 60),
         validate_hash=cfg.dataset.get('validate_hash', None),
