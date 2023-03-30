@@ -8,12 +8,13 @@ to the `CIFAR dataset <https://www.cs.toronto.edu/~kriz/cifar.html>`_ for more
 details.
 """
 
+import os
 from typing import Any, Callable, Optional
 
 from composer.core import DataSpec
 from composer.datasets.utils import NormalizationFn, pil_image_collate
 from composer.utils import dist
-from streaming import StreamingDataset
+from streaming import StreamingDataset, Stream
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torchvision.datasets import VisionDataset
@@ -34,7 +35,7 @@ class StreamingCIFAR(StreamingDataset, VisionDataset):
             is stored.
         local (str): Local filesystem directory where dataset is cached during
             operation.
-        split (str): The dataset split to use, either 'train' or 'test'.
+        split (str): The dataset split to use, either 'train' or 'val'.
         shuffle (bool): Whether to iterate over the samples in randomized order.
         transform (callable, optional): A function/transform that takes in an
             image and returns a transformed version. Default: ``None``.
@@ -50,15 +51,20 @@ class StreamingCIFAR(StreamingDataset, VisionDataset):
                  transform: Optional[Callable] = None,
                  batch_size: Optional[int] = None) -> None:
 
-        if split not in ['train', 'test']:
+        if split not in ['train', 'val']:
             raise ValueError(
-                f"split='{split}', but must be one of ['train', 'test'].")
+                f"split='{split}', but must be one of ['train', 'val'].")
 
         self.transform = transform
 
-        super().__init__(remote=remote,
-                         local=local,
-                         split=split,
+        streams = []
+        for dir_name in ['01', '02', '03', '04']:
+            local_dir = os.path.join(local, dir_name)
+            remote_dir = os.path.join(remote, dir_name)
+            stream = Stream(local=local_dir, remote=remote_dir, split=split)
+            streams.append(stream)
+
+        super().__init__(streams=streams,
                          shuffle=shuffle,
                          batch_size=batch_size)
 
@@ -106,7 +112,7 @@ def build_cifar10_dataspec(
         raise ValueError(
             '`local` argument must be specified if using a streaming dataset.')
 
-    split = 'train' if is_train else 'test'
+    split = 'train' if is_train else 'val'
     if is_train:
         transform = transforms.Compose([
             transforms.RandomCrop(32, padding=4),
