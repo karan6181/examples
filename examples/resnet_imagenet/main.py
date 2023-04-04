@@ -199,6 +199,7 @@ def main(config):
         grad_accum=config.grad_accum,
         seed=config.seed,
         python_log_level=config.get('python_log_level', None),
+        use_torch_compile=config.get('use_torch_compile', False),
     )
     print('Built Trainer\n')
 
