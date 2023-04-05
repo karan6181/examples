@@ -34,10 +34,6 @@ def build_logger(name: str, kwargs: Dict):
 
 def main(config):
     reproducibility.seed_all(config.seed)
-    if config.grad_accum == 'auto' and not torch.cuda.is_available():
-        raise ValueError(
-            'grad_accum="auto" requires training with a GPU; please specify grad_accum as an integer'
-        )
 
     # If using a recipe, update the config's loss name, eval and train resize sizes, and the max duration
     if config.recipe_name:
@@ -176,7 +172,7 @@ def main(config):
     # Create the Trainer!
     print('Building Trainer')
     device = 'gpu' if torch.cuda.is_available() else 'cpu'
-    precision = 'amp' if device == 'gpu' else 'fp32'  # Mixed precision for fast training when using a GPU
+    precision = 'amp_fp16' if device == 'gpu' else 'fp32'  # Mixed precision for fast training when using a GPU
     trainer = Trainer(
         run_name=config.run_name,
         model=composer_model,
@@ -196,7 +192,8 @@ def main(config):
         load_path=config.load_path,
         device=device,
         precision=precision,
-        grad_accum=config.grad_accum,
+        # grad_accum=config.grad_accum,
+        device_train_microbatch_size=config.get('device_train_microbatch_size', 'auto'),
         seed=config.seed,
         python_log_level=config.get('python_log_level', None),
         use_torch_compile=config.get('use_torch_compile', False),
