@@ -118,6 +118,7 @@ def main(cfg: DictConfig,
         load_path=cfg.get('load_path', None),
         load_weights_only=cfg.get('load_weights_only', False),
         python_log_level=cfg.get('python_log_level', None),
+        use_torch_compile=cfg.get('use_torch_compile', False),
     )
 
     print('Logging config...')
