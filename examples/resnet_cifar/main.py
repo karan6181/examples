@@ -30,10 +30,6 @@ def build_logger(name: str, kwargs: Dict):
 
 def main(config):
     reproducibility.seed_all(config.seed)
-    if config.grad_accum == 'auto' and not torch.cuda.is_available():
-        raise ValueError(
-            'grad_accum="auto" requires training with a GPU; please specify grad_accum as an integer'
-        )
 
     # Initialize dist to ensure CIFAR is only downloaded by rank 0
     device = 'gpu' if torch.cuda.is_available() else 'cpu'
@@ -128,14 +124,14 @@ def main(config):
         loggers=loggers,
         max_duration=config.max_duration,
         callbacks=[speed_monitor, lr_monitor, memory_monitor],
-        save_folder=config.save_folder,
-        save_interval=config.save_interval,
-        save_num_checkpoints_to_keep=config.save_num_checkpoints_to_keep,
+        save_folder=config.get('save_folder', None),
+        save_interval=config.get('save_interval', '1000ba'),
+        save_num_checkpoints_to_keep=config.get('save_num_checkpoints_to_keep', -1),
         save_overwrite=config.get('save_overwrite', False),
-        load_path=config.load_path,
+        load_path=config.get('load_path', None),
         device=device,
         precision=precision,
-        grad_accum=config.grad_accum,
+        device_train_microbatch_size=config.get('device_train_microbatch_size', 'auto'),
         seed=config.seed,
         python_log_level=config.get('python_log_level', None),
     )
