@@ -34,10 +34,6 @@ def build_logger(name: str, kwargs: Dict):
 
 def main(config):
     reproducibility.seed_all(config.seed)
-    if config.grad_accum == 'auto' and not torch.cuda.is_available():
-        raise ValueError(
-            'grad_accum="auto" requires training with a GPU; please specify grad_accum as an integer'
-        )
 
     # If using a recipe, update the config's loss name, eval and train resize sizes, and the max duration
     if config.recipe_name:
