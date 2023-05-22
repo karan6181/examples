@@ -9,7 +9,7 @@ details.
 """
 
 import os
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from composer.core import DataSpec
 from composer.datasets.utils import NormalizationFn, pil_image_collate
@@ -49,7 +49,8 @@ class StreamingCIFAR(StreamingDataset, VisionDataset):
                  split: str,
                  shuffle: bool,
                  transform: Optional[Callable] = None,
-                 batch_size: Optional[int] = None) -> None:
+                 batch_size: Optional[int] = None,
+                 cache_limit:Optional[Union[int, str]] = None) -> None:
 
         if split not in ['train', 'val']:
             raise ValueError(
@@ -57,16 +58,14 @@ class StreamingCIFAR(StreamingDataset, VisionDataset):
 
         self.transform = transform
 
-        streams = []
-        for dir_name in ['01', '02', '03', '04']:
-            local_dir = os.path.join(local, dir_name)
-            remote_dir = os.path.join(remote, dir_name)
-            stream = Stream(local=local_dir, remote=remote_dir, split=split)
-            streams.append(stream)
-
-        super().__init__(streams=streams,
+        super().__init__(remote=remote,
+                         local=local,
+                         split=split,
                          shuffle=shuffle,
-                         batch_size=batch_size)
+                         batch_size=batch_size,
+                         cache_limit=cache_limit,
+                         predownload=1000)
+
 
     def __getitem__(self, idx: int) -> Any:
         sample = super().__getitem__(idx)
@@ -88,6 +87,9 @@ def build_cifar10_dataspec(
     download: bool = True,
     drop_last: bool = True,
     shuffle: bool = True,
+    cache_limit: Optional[Union[int, str]] = None,
+    predownload: Optional[int] = 100_000,
+    shuffle_block_size: int = 1 << 18,
     **dataloader_kwargs: Any,
 ) -> DataSpec:
     """Builds a CIFAR-10 dataloader with default transforms.
@@ -105,6 +107,15 @@ def build_cifar10_dataspec(
             needed. Default: ``True``.
         drop_last (bool): Drop remainder samples. Default: ``True``.
         shuffle (bool): Shuffle the dataset. Default: ``True``.
+        cache_limit (Union[int, str], optional): Maximum size in bytes of this StreamingDataset's
+            shard cache. Before downloading a shard, the least recently used resident shard(s)
+            may be evicted (deleted from the local cache) in order to stay under the limit.
+            Set to ``None`` to disable shard eviction. Supported value is integer or a human
+            readable byte size format, for example, ``100b``, ``64kb``, ``77mb``, upto yotta byte.
+            Defaults to ``None``.
+        predownload (int, optional): Target number of samples ahead to download the shards of while
+            iterating. Defaults to ``100_000``.
+        shuffle_block_size (int): Unit of shuffle. Defaults to ``1 << 18``.
         **dataloader_kwargs (Any): Additional settings for the dataloader
             (e.g. num_workers, etc.).
     """
@@ -129,7 +140,10 @@ def build_cifar10_dataspec(
             split=split,
             shuffle=shuffle,
             transform=transform,  # type: ignore
-            batch_size=batch_size)
+            batch_size=batch_size,
+            cache_limit=cache_limit,
+            predownload=predownload,
+            shuffle_block_size=shuffle_block_size)
         sampler = None
     else:
         with dist.run_local_rank_zero_first():

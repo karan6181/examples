@@ -51,6 +51,9 @@ def main(config):
         local=config.train_dataset.local,
         is_train=True,
         download=config.train_dataset.download,
+        cache_limit=config.train_dataset.cache_limit,
+        predownload=config.train_dataset.predownload,
+        shuffle_block_size=config.train_dataset.shuffle_block_size,
         drop_last=True,
         shuffle=True,
         num_workers=8,
@@ -66,6 +69,9 @@ def main(config):
         local=config.eval_dataset.local,
         is_train=False,
         download=config.eval_dataset.download,
+        cache_limit=config.train_dataset.cache_limit,
+        predownload=config.train_dataset.predownload,
+        shuffle_block_size=config.train_dataset.shuffle_block_size,
         drop_last=False,
         shuffle=False,
         num_workers=8,
@@ -111,7 +117,7 @@ def main(config):
     ]
 
     print('Building Trainer')
-    precision = 'amp' if device == 'gpu' else 'fp32'  # Mixed precision for fast training when using a GPU
+    precision = 'amp_fp16' if device == 'gpu' else 'fp32'  # Mixed precision for fast training when using a GPU
     trainer = Trainer(
         run_name=config.run_name,
         model=model,

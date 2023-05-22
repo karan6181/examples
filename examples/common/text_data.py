@@ -5,7 +5,7 @@
 
 import os
 from itertools import islice
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
 import torch
@@ -43,6 +43,13 @@ class StreamingTextDataset(StreamingDataset):
             If ``None``, defaults to the number of nodes of the initial run. Defaults to 128.
         batch_size (int, optional): Batch size of its DataLoader, which affects how the dataset is
             partitioned over the workers. Defaults to ``None``.
+        cache_limit (Union[int, str], optional): Maximum size in bytes of this StreamingDataset's
+            shard cache. Before downloading a shard, the least recently used resident shard(s)
+            may be evicted (deleted from the local cache) in order to stay under the limit.
+            Set to ``None`` to disable shard eviction. Supported value is integer or a human
+            readable byte size format, for example, ``100b``, ``64kb``, ``77mb``, upto yotta byte.
+            Defaults to ``None``.
+        shuffle_block_size (int): Unit of shuffle. Defaults to ``1 << 18``.
     """
 
     def __init__(self,
@@ -60,6 +67,8 @@ class StreamingTextDataset(StreamingDataset):
                  shuffle_seed: int = 9176,
                  num_canonical_nodes: Optional[int] = 128,
                  batch_size: Optional[int] = None,
+                 cache_limit: Optional[Union[int, str]] = None,
+                 shuffle_block_size: int = 1 << 18,
                  **kwargs: Dict[str, Any]):
 
         group_method = kwargs.pop('group_method', None)
@@ -83,6 +92,7 @@ class StreamingTextDataset(StreamingDataset):
                     )
 
         # Build Dataset
+        print(f'{predownload=}, {shuffle_block_size=}')
         super().__init__(local=local,
                          remote=remote,
                          split=split,
@@ -94,7 +104,9 @@ class StreamingTextDataset(StreamingDataset):
                          validate_hash=validate_hash,
                          shuffle_seed=shuffle_seed,
                          num_canonical_nodes=num_canonical_nodes,
-                         batch_size=batch_size)
+                         batch_size=batch_size,
+                         cache_limit=cache_limit,
+                         shuffle_block_size=shuffle_block_size)
         self.max_seq_len = max_seq_len
 
         # Build tokenizer
@@ -158,7 +170,9 @@ def build_text_dataloader(cfg: DictConfig, device_batch_size: int):
         validate_hash=cfg.dataset.get('validate_hash', None),
         shuffle_seed=cfg.dataset.get('shuffle_seed', 9176),
         num_canonical_nodes=cfg.dataset.get('num_canonical_nodes', 128),
-        batch_size=device_batch_size)
+        batch_size=device_batch_size,
+        cache_limit=cfg.dataset.get('cache_limit', None),
+        shuffle_block_size=cfg.dataset.get('shuffle_block_size', 1 << 18),)
 
     mlm_probability = cfg.dataset.get('mlm_probability', None)
     collate_fn = transformers.DataCollatorForLanguageModeling(

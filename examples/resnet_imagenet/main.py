@@ -64,6 +64,9 @@ def main(config):
         shuffle=True,
         resize_size=config.train_dataset.resize_size,
         crop_size=config.train_dataset.crop_size,
+        cache_limit=config.train_dataset.cache_limit,
+        predownload=config.train_dataset.predownload,
+        shuffle_block_size=config.train_dataset.shuffle_block_size,
         num_workers=8,
         pin_memory=True,
         persistent_workers=True)
@@ -74,7 +77,7 @@ def main(config):
     print('Building evaluation dataloader')
     eval_dataspec = build_imagenet_dataspec(
         data_path=config.eval_dataset.path,
-        is_streaming=config.train_dataset.is_streaming,
+        is_streaming=config.eval_dataset.is_streaming,
         batch_size=eval_batch_size,
         local=config.eval_dataset.local,
         is_train=False,
@@ -82,6 +85,9 @@ def main(config):
         shuffle=False,
         resize_size=config.eval_dataset.resize_size,
         crop_size=config.eval_dataset.crop_size,
+        cache_limit=config.eval_dataset.cache_limit,
+        predownload=config.train_dataset.predownload,
+        shuffle_block_size=config.train_dataset.shuffle_block_size,
         num_workers=8,
         pin_memory=True,
         persistent_workers=True)
@@ -172,13 +178,13 @@ def main(config):
     # Create the Trainer!
     print('Building Trainer')
     device = 'gpu' if torch.cuda.is_available() else 'cpu'
-    precision = 'amp' if device == 'gpu' else 'fp32'  # Mixed precision for fast training when using a GPU
+    precision = 'amp_fp16' if device == 'gpu' else 'fp32'  # Mixed precision for fast training when using a GPU
     trainer = Trainer(
         run_name=config.run_name,
         model=composer_model,
         train_dataloader=train_dataspec,
         eval_dataloader=eval_dataspec,
-        eval_interval='1ep',
+        eval_interval=config.get('eval_interval', '1ep'),
         optimizers=optimizer,
         schedulers=lr_scheduler,
         algorithms=algorithms,

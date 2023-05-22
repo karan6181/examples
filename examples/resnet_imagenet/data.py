@@ -4,7 +4,7 @@
 import itertools
 import os
 import sys
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Union
 
 import torch
 from composer.core import DataSpec
@@ -41,7 +41,8 @@ class StreamingImageNet(StreamingDataset, VisionDataset):
                  split: Optional[str],
                  shuffle: bool,
                  transform: Optional[Callable] = None,
-                 batch_size: Optional[int] = None) -> None:
+                 batch_size: Optional[int] = None,
+                 cache_limit: Optional[Union[int, str]] = None) -> None:
 
         if split not in ['train', 'val']:
             raise ValueError(
@@ -53,7 +54,8 @@ class StreamingImageNet(StreamingDataset, VisionDataset):
                          local=local,
                          split=split,
                          shuffle=shuffle,
-                         batch_size=batch_size)
+                         batch_size=batch_size,
+                         cache_limit=cache_limit,)
 
     def __getitem__(self, idx: int) -> Any:
         sample = super().__getitem__(idx)
@@ -76,6 +78,9 @@ def build_imagenet_dataspec(
     shuffle: bool = True,
     resize_size: int = -1,
     crop_size: int = 224,
+    cache_limit: Optional[Union[int, str]] = None,
+    predownload: Optional[int] = 100_000,
+    shuffle_block_size: int = 1 << 18,
     **dataloader_kwargs,
 ) -> DataSpec:
     """Builds an ImageNet dataloader for either local or remote data.
@@ -92,6 +97,15 @@ def build_imagenet_dataspec(
         shuffle (bool, optional): whether to shuffle the dataset. Default: ``True``.
         resize_size (int, optional): The resize size to use. Use ``-1`` to not resize. Default: ``-1``.
         crop_size (int, optional): The crop size to use. Default: ``224``.
+        cache_limit (Union[int, str], optional): Maximum size in bytes of this StreamingDataset's
+            shard cache. Before downloading a shard, the least recently used resident shard(s)
+            may be evicted (deleted from the local cache) in order to stay under the limit.
+            Set to ``None`` to disable shard eviction. Supported value is integer or a human
+            readable byte size format, for example, ``100b``, ``64kb``, ``77mb``, upto yotta byte.
+            Defaults to ``None``.
+        predownload (int, optional): Target number of samples ahead to download the shards of while
+            iterating. Defaults to ``100_000``.
+        shuffle_block_size (int): Unit of shuffle. Defaults to ``1 << 18``.
         **dataloader_kwargs (Dict[str, Any]): Additional settings for the dataloader (e.g. num_workers, etc.)
     """
     if is_streaming and not local:
@@ -124,7 +138,10 @@ def build_imagenet_dataspec(
                                     local=local,
                                     split=split,
                                     shuffle=shuffle,
-                                    transform=transform)  # type: ignore
+                                    transform=transform,
+                                    cache_limit=cache_limit,
+                                    predownload=predownload,
+                                    shuffle_block_size=shuffle_block_size)  # type: ignore
         sampler = None
     else:
         dataset = ImageFolder(os.path.join(data_path, split), transform)
@@ -169,6 +186,3 @@ def check_dataloader():
             f'Batch id: {batch_ix}; Image batch shape: {batch[0].shape}; Target batch shape: {batch[1].shape}'
         )
 
-
-if __name__ == '__main__':
-    check_dataloader()
