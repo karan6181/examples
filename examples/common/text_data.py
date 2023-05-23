@@ -50,6 +50,7 @@ class StreamingTextDataset(StreamingDataset):
             readable byte size format, for example, ``100b``, ``64kb``, ``77mb``, upto yotta byte.
             Defaults to ``None``.
         shuffle_block_size (int): Unit of shuffle. Defaults to ``1 << 18``.
+        shuffle_algo (str): Which shuffling algorithm to use. Defaults to ``py1b``.
     """
 
     def __init__(self,
@@ -69,6 +70,7 @@ class StreamingTextDataset(StreamingDataset):
                  batch_size: Optional[int] = None,
                  cache_limit: Optional[Union[int, str]] = None,
                  shuffle_block_size: int = 1 << 18,
+                 shuffle_algo: str = 'py1b',
                  **kwargs: Dict[str, Any]):
 
         group_method = kwargs.pop('group_method', None)
@@ -106,7 +108,8 @@ class StreamingTextDataset(StreamingDataset):
                          num_canonical_nodes=num_canonical_nodes,
                          batch_size=batch_size,
                          cache_limit=cache_limit,
-                         shuffle_block_size=shuffle_block_size)
+                         shuffle_block_size=shuffle_block_size,
+                         shuffle_algo=shuffle_algo)
         self.max_seq_len = max_seq_len
 
         # Build tokenizer
@@ -172,7 +175,8 @@ def build_text_dataloader(cfg: DictConfig, device_batch_size: int):
         num_canonical_nodes=cfg.dataset.get('num_canonical_nodes', 128),
         batch_size=device_batch_size,
         cache_limit=cfg.dataset.get('cache_limit', None),
-        shuffle_block_size=cfg.dataset.get('shuffle_block_size', 1 << 18),)
+        shuffle_block_size=cfg.dataset.get('shuffle_block_size', 1 << 18),
+        shuffle_algo=cfg.dataset.get('shuffle_algo', 'py1b'),)
 
     mlm_probability = cfg.dataset.get('mlm_probability', None)
     collate_fn = transformers.DataCollatorForLanguageModeling(
