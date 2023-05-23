@@ -33,6 +33,15 @@ class StreamingImageNet(StreamingDataset, VisionDataset):
             Default: ``None``.
         batch_size (int, optional): The batch size that will be used on each device's DataLoader.
             Default: ``None``.
+        cache_limit (Union[int, str], optional): Maximum size in bytes of this StreamingDataset's
+            shard cache. Before downloading a shard, the least recently used resident shard(s)
+            may be evicted (deleted from the local cache) in order to stay under the limit.
+            Set to ``None`` to disable shard eviction. Supported value is integer or a human
+            readable byte size format, for example, ``100b``, ``64kb``, ``77mb``, upto yotta byte.
+            Defaults to ``None``.
+        predownload (int, optional): Target number of samples ahead to download the shards of while
+            iterating. Defaults to ``100_000``.
+        shuffle_block_size (int): Unit of shuffle. Defaults to ``1 << 18``.
     """
 
     def __init__(self,
@@ -42,7 +51,9 @@ class StreamingImageNet(StreamingDataset, VisionDataset):
                  shuffle: bool,
                  transform: Optional[Callable] = None,
                  batch_size: Optional[int] = None,
-                 cache_limit: Optional[Union[int, str]] = None) -> None:
+                 cache_limit: Optional[Union[int, str]] = None,
+                 predownload: Optional[int] = 100_000,
+                 shuffle_block_size: int = 1 << 18,) -> None:
 
         if split not in ['train', 'val']:
             raise ValueError(
@@ -55,7 +66,9 @@ class StreamingImageNet(StreamingDataset, VisionDataset):
                          split=split,
                          shuffle=shuffle,
                          batch_size=batch_size,
-                         cache_limit=cache_limit,)
+                         cache_limit=cache_limit,
+                         predownload=predownload,
+                         shuffle_block_size=shuffle_block_size)
 
     def __getitem__(self, idx: int) -> Any:
         sample = super().__getitem__(idx)
