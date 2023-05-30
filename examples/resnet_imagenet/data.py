@@ -53,7 +53,8 @@ class StreamingImageNet(StreamingDataset, VisionDataset):
                  batch_size: Optional[int] = None,
                  cache_limit: Optional[Union[int, str]] = None,
                  predownload: Optional[int] = 100_000,
-                 shuffle_block_size: int = 1 << 18,) -> None:
+                 shuffle_block_size: int = 1 << 18,
+                 num_canonical_nodes: Optional[int] = 128) -> None:
 
         if split not in ['train', 'val']:
             raise ValueError(
@@ -68,7 +69,8 @@ class StreamingImageNet(StreamingDataset, VisionDataset):
                          batch_size=batch_size,
                          cache_limit=cache_limit,
                          predownload=predownload,
-                         shuffle_block_size=shuffle_block_size)
+                         shuffle_block_size=shuffle_block_size,
+                         num_canonical_nodes=num_canonical_nodes)
 
     def __getitem__(self, idx: int) -> Any:
         sample = super().__getitem__(idx)
@@ -94,6 +96,7 @@ def build_imagenet_dataspec(
     cache_limit: Optional[Union[int, str]] = None,
     predownload: Optional[int] = 100_000,
     shuffle_block_size: int = 1 << 18,
+    num_canonical_nodes: Optional[int] = 64,
     **dataloader_kwargs,
 ) -> DataSpec:
     """Builds an ImageNet dataloader for either local or remote data.
@@ -154,7 +157,8 @@ def build_imagenet_dataspec(
                                     transform=transform,
                                     cache_limit=cache_limit,
                                     predownload=predownload,
-                                    shuffle_block_size=shuffle_block_size)  # type: ignore
+                                    shuffle_block_size=shuffle_block_size,
+                                    num_canonical_nodes=num_canonical_nodes)  # type: ignore
         sampler = None
     else:
         dataset = ImageFolder(os.path.join(data_path, split), transform)

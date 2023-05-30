@@ -67,6 +67,7 @@ def main(config):
         cache_limit=config.train_dataset.get('cache_limit', None),
         predownload=config.train_dataset.get('predownload', 100_000),
         shuffle_block_size=config.train_dataset.get('shuffle_block_size', 1 << 18),
+        num_canonical_nodes=config.train_dataset.get('num_canonical_nodes', 64),
         num_workers=8,
         pin_memory=True,
         persistent_workers=True)
@@ -88,6 +89,7 @@ def main(config):
         cache_limit=config.eval_dataset.get('cache_limit', None),
         predownload=config.eval_dataset.get('predownload', 100_000),
         shuffle_block_size=config.eval_dataset.get('shuffle_block_size', 1 << 18),
+        num_canonical_nodes=config.train_dataset.get('num_canonical_nodes', 64),
         num_workers=8,
         pin_memory=True,
         persistent_workers=True)
