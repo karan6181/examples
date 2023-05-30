@@ -123,7 +123,7 @@ def main(config):
         model=model,
         train_dataloader=train_dataspec,
         eval_dataloader=test_dataspec,
-        eval_interval='1ep',
+        eval_interval=config.get('eval_interval', '1ep'),
         optimizers=optimizer,
         schedulers=lr_scheduler,
         algorithms=algorithms,
