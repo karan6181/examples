@@ -10,6 +10,8 @@ from composer.core import Evaluator
 from composer.utils import dist, get_device, reproducibility
 from omegaconf import OmegaConf as om
 
+import streaming
+
 from examples.common.builders import (build_algorithm, build_callback,
                                       build_icl_evaluators, build_logger,
                                       build_optimizer, build_scheduler)
@@ -122,6 +124,9 @@ def main(cfg):
     print(f'{cfg.n_params=:.2e}')
     if hasattr(model, 'num_fwd_flops'):
         print(f'{model.num_fwd_flops=:.2e}')
+
+    print('Clean stale shared memory')
+    streaming.base.util.clean_stale_shared_memory()
 
     # Dataloaders
     print('Building train loader...')
