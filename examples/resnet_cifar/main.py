@@ -55,7 +55,7 @@ def main(config):
         shuffle=True,
         num_workers=8,
         pin_memory=True,
-        persistent_workers=False)
+        persistent_workers=True)
     print('Built train dataloader\n')
 
     print('Building evaluation dataloader')
@@ -70,7 +70,7 @@ def main(config):
         shuffle=False,
         num_workers=8,
         pin_memory=True,
-        persistent_workers=False)
+        persistent_workers=True)
     print('Built evaluation dataloader\n')
 
     print('Build Composer model')
