@@ -70,7 +70,7 @@ def main(config):
         num_canonical_nodes=config.train_dataset.get('num_canonical_nodes', 64),
         num_workers=8,
         pin_memory=True,
-        persistent_workers=False)
+        persistent_workers=True)
 
     print('Built train dataloader\n')
 
@@ -92,7 +92,7 @@ def main(config):
         num_canonical_nodes=config.train_dataset.get('num_canonical_nodes', 64),
         num_workers=8,
         pin_memory=True,
-        persistent_workers=False)
+        persistent_workers=True)
     print('Built evaluation dataloader\n')
 
     # Instantiate torchvision ResNet model
