@@ -155,6 +155,7 @@ def build_imagenet_dataspec(
                                     split=split,
                                     shuffle=shuffle,
                                     transform=transform,
+                                    batch_size=batch_size,
                                     cache_limit=cache_limit,
                                     predownload=predownload,
                                     shuffle_block_size=shuffle_block_size,
